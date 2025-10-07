@@ -15,7 +15,8 @@
 │   ├── core/
 │   │   └── config.py         # 설정 관리
 │   ├── services/
-│   │   └── ai_pipeline.py    # 핵심 비즈니스 로직
+│   │   └── ai_pipeline.py    # AI 3D 변환 로직
+│   │   └── email_service.py  # 결과물 이메일 전송 로직
 │   ├── schemas/
 │   │   └── generation.py     # 데이터 유효성 검사 모델
 │   └── main.py             # FastAPI 앱 시작점
