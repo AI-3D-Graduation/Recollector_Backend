@@ -4,7 +4,9 @@ import json
 import redis
 import base64
 import requests
+from typing import Optional
 from app.core.config import settings
+from .email_service import send_result_email
 
 MESHY_API_BASE_URL = settings.MESHY_API_BASE_URL
 MESHY_API_KEY = settings.MESHY_API_KEY
@@ -29,7 +31,7 @@ def _save_meta(task_id, meta_data):
         json.dump(meta_data, f, indent=4)
 
 
-def run_ai_pipeline(task_id: str, image_path: str, original_filename: str, options: dict):
+def run_ai_pipeline(task_id: str, image_path: str, original_filename: str, options: dict, recipient_email: Optional[str]):
     print(f"[{task_id}] AI 파이프라인 시작. 옵션: {options}")
 
     headers = {"Authorization": f"Bearer {MESHY_API_KEY}"}
@@ -82,12 +84,26 @@ def run_ai_pipeline(task_id: str, image_path: str, original_filename: str, optio
 
                 print(f"[{task_id}] 최종 모델 파일 다운로드 및 저장 완료.")
 
+                viewer_url = f"http://127.0.0.1:8000/viewer/{output_filename}"
                 final_status = {
                     "status": "completed", "progress": 100,
                     "viewer_url": f"/viewer/{output_filename}",
                     "model_url": f"/static/models/{output_filename}"
                 }
                 _update_status(task_id, final_status)
+
+                if recipient_email:
+                    import asyncio
+                    email_sent, email_detail = asyncio.run(send_result_email(recipient_email, viewer_url))
+
+                    final_status["email_status"] = {
+                        "sent": email_sent,
+                        "recipient": recipient_email,
+                        "detail": email_detail
+                    }
+
+                _update_status(task_id, final_status)
+
                 break
 
             elif external_status == "FAILED":
