@@ -3,10 +3,11 @@ import os
 import json
 import redis
 from app.core.config import settings
-from fastapi import APIRouter, File, UploadFile, BackgroundTasks, HTTPException, Depends, Path
+from fastapi import APIRouter, File, UploadFile, BackgroundTasks, HTTPException, Depends, Path, Form
 from starlette.responses import JSONResponse
 from app.services.ai_pipeline import run_ai_pipeline
 from app.schemas.generation import AIOptions
+from typing import Optional
 
 
 router = APIRouter()
@@ -29,7 +30,8 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 async def generate_3d_model(
     background_tasks: BackgroundTasks,
     options: AIOptions = Depends(),
-    file: UploadFile = File(..., description="3D 모델을 생성할 원본 이미지 파일 (JPG, PNG 등)")
+    file: UploadFile = File(..., description="3D 모델을 생성할 원본 이미지 파일 (JPG, PNG 등)"),
+    recipient_email: Optional[str] = Form(None, description="결과를 통보받을 이메일 주소 (선택 사항)")
 ):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="이미지 파일만 업로드할 수 있습니다.")
@@ -47,7 +49,8 @@ async def generate_3d_model(
         task_id=task_id,
         image_path=file_path,
         original_filename=file.filename,
-        options=options.dict()
+        options=options.dict(),
+        recipient_email=recipient_email
     )
 
     return JSONResponse(

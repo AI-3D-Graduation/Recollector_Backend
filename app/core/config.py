@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from pydantic_settings import BaseSettings
+from pydantic import EmailStr
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -16,6 +17,13 @@ class Settings(BaseSettings):
     OUTPUT_DIR: Path = BASE_DIR.parent / "static/models"
     METADATA_DIR: Path = BASE_DIR.parent / "metadata"
     UPLOAD_DIR: Path = BASE_DIR.parent / "uploads"
+
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: EmailStr
+    MAIL_SERVER: str
+    MAIL_PORT: int
+    MAIL_FROM_NAME: str
 
     class Config:
         env_file = ".env"
