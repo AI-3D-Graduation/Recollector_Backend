@@ -37,3 +37,4 @@
 | `POST`      | `/api/generate`         | 이미지로 3D 모델 생성을 시작하고 작업 ID를 받습니다.       |
 | `GET`       | `/api/status/{task_id}` | 작업 ID로 생성 상태와 진행률을 조회합니다.               |
 | `DELETE`    | `/api/tasks/{task_id}`  | 특정 작업과 관련된 모든 파일 및 데이터를 삭제합니다.     |
+|`POST`    | `/api/tasks/{task_id}/set-email`|진행 중이거나 완료된 작업에 대해 결과 통보를 받을 이메일 주소를 설정합니다.|
