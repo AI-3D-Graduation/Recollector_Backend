@@ -3,11 +3,10 @@ import os
 import json
 import redis
 from app.core.config import settings
-from fastapi import APIRouter, File, UploadFile, BackgroundTasks, HTTPException, Depends, Path, Form
+from fastapi import APIRouter, File, UploadFile, BackgroundTasks, HTTPException, Depends, Path, Form, Body
 from starlette.responses import JSONResponse
 from app.services.ai_pipeline import run_ai_pipeline
-from app.schemas.generation import AIOptions
-from typing import Optional
+from app.schemas.generation import AIOptions, SetEmailRequest
 
 
 router = APIRouter()
@@ -31,7 +30,6 @@ async def generate_3d_model(
     background_tasks: BackgroundTasks,
     options: AIOptions = Depends(),
     file: UploadFile = File(..., description="3D 모델을 생성할 원본 이미지 파일 (JPG, PNG 등)"),
-    recipient_email: Optional[str] = Form(None, description="결과를 통보받을 이메일 주소 (선택 사항)")
 ):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="이미지 파일만 업로드할 수 있습니다.")
@@ -50,7 +48,6 @@ async def generate_3d_model(
         image_path=file_path,
         original_filename=file.filename,
         options=options.dict(),
-        recipient_email=recipient_email
     )
 
     return JSONResponse(
@@ -111,3 +108,24 @@ async def delete_task(task_id: str = Path(..., description="삭제할 작업의 
         "message": f"Task '{task_id}' and associated files deleted successfully.",
         "deleted_files": deleted_files
     }
+
+
+@router.post(
+    "/tasks/{task_id}/set-email",
+    summary="작업에 결과 통보 이메일 설정",
+    description="진행 중이거나 완료된 작업에 대해 결과 통보를 받을 이메일 주소를 설정합니다."
+)
+async def set_email_for_task(
+        task_id: str = Path(..., description="이메일 주소를 설정할 작업의 고유 ID"),
+        request_body: SetEmailRequest = Body(...)
+):
+    status_json = redis_client.get(task_id)
+    if not status_json:
+        raise HTTPException(status_code=404, detail=f"Task ID '{task_id}' not found.")
+
+    status_data = json.loads(status_json)
+    status_data['recipient_email'] = request_body.recipient_email
+    redis_client.set(task_id, json.dumps(status_data))
+
+    return {"message": "Email address has been set for the task.", "task_id": task_id,
+            "recipient_email": request_body.recipient_email}
