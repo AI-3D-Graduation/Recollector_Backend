@@ -1,0 +1,10 @@
+{
+    "original_filename": "ski.jpg",
+    "options": {
+        "enable_pbr": true,
+        "should_remesh": true,
+        "should_texture": true,
+        "ai_model": "latest"
+    },
+    "external_task_id": "019a0638-91df-7304-8da5-894cd4c410ef"
+}
