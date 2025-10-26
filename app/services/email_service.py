@@ -38,7 +38,7 @@ async def send_result_email(recipient_email: str, viewer_url: str):
                 </a>
                 
                 <p style="color: #777777; font-size: 14px;">
-                    이 링크는 24시간 동안 유효합니다. (예시 문구)
+                    이 링크는 24시간 동안 유효합니다.
                 </p>
 
             </div>
