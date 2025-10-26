@@ -90,7 +90,7 @@ def run_ai_pipeline(task_id: str, image_path: str, original_filename: str, optio
 
                 current_data = json.loads(redis_client.get(task_id) or '{}')
 
-                viewer_url = f"http://127.0.0.1:3000/result/{task_id}"
+                viewer_url = f"http://reacollector-frontend.vercel.app/result/{task_id}"
                 completion_data = {
                     "status": "completed",
                     "progress": 100,
